@@ -1,0 +1,770 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard Admin - UNDANGAN (Platform Undangan Digital Multi-Acara)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="admin-page">
+
+  <!-- Top Navigation Bar -->
+  <header class="admin-nav">
+    <div class="admin-nav-inner">
+      <div class="admin-brand">
+        <span style="font-size:24px">💌</span>
+        <div>
+          <h1 style="letter-spacing:1px">UNDANGAN</h1>
+          <small style="color:#6b7280;font-size:11px">Platform Undangan Digital Multi-Acara · V2</small>
+        </div>
+      </div>
+
+      <!-- Active Invitation Switcher -->
+      <div id="invitationSwitcherWrap" style="display:flex;align-items:center;gap:8px" hidden>
+        <label style="font-size:12px;font-weight:600;color:#374151" for="activeInvSelect">Undangan Aktif:</label>
+        <select id="activeInvSelect" class="form-control" style="padding:6px 12px;width:auto;font-size:13px;font-weight:600"></select>
+        <button id="viewActiveInvBtn" class="btn btn-outline" style="padding:6px 12px;font-size:12px" title="Buka undangan di tab baru">Lihat ↗</button>
+      </div>
+
+      <div>
+        <button id="logoutBtn" class="btn btn-outline" style="padding:7px 14px;font-size:12px" hidden>Keluar</button>
+      </div>
+    </div>
+
+    <!-- 16 Admin Tabs -->
+    <nav class="admin-tabs" id="adminTabs" hidden>
+      <button class="tab-btn active" data-tab="tabDashboard">📊 Dashboard</button>
+      <button class="tab-btn" data-tab="tabInvitations">📜 Semua Undangan</button>
+      <button class="tab-btn" data-tab="tabCreateWizard">➕ Buat Undangan Baru</button>
+      <button class="tab-btn" data-tab="tabCategories">🏷️ Kategori Acara</button>
+      <button class="tab-btn" data-tab="tabThemes">🎨 Theme Studio</button>
+      <button class="tab-btn" data-tab="tabAnimations">✨ Animation Studio</button>
+      <button class="tab-btn" data-tab="tabBackgrounds">🖼️ Background &amp; Ornamen</button>
+      <button class="tab-btn" data-tab="tabMusic">🎵 Music Studio</button>
+      <button class="tab-btn" data-tab="tabSections">🧩 Section Builder</button>
+      <button class="tab-btn" data-tab="tabTemplates">📑 Template Manager</button>
+      <button class="tab-btn" data-tab="tabAssets">📁 Galeri Aset</button>
+      <button class="tab-btn" data-tab="tabGuests">👥 Daftar Tamu</button>
+      <button class="tab-btn" data-tab="tabRsvp">📝 RSVP</button>
+      <button class="tab-btn" data-tab="tabStats">📈 Statistik</button>
+      <button class="tab-btn" data-tab="tabSettings">⚙️ Pengaturan</button>
+      <button class="tab-btn" data-tab="tabHistory">🕒 Riwayat Perubahan</button>
+    </nav>
+  </header>
+
+  <!-- Login Panel -->
+  <main class="admin-body">
+    <section id="loginPanel" class="card-panel" style="max-width:440px;margin:50px auto;text-align:center">
+      <div style="font-size:42px;margin-bottom:10px">💌</div>
+      <h2 style="margin-bottom:4px">UNDANGAN V2</h2>
+      <p class="eyebrow" style="margin-bottom:12px;color:var(--primary)">Satu Platform, Beragam Undangan</p>
+      <p style="color:#6b7280;font-size:13px;margin-bottom:20px">Masuk ke dashboard untuk mengelola berbagai jenis undangan digital.</p>
+      <form id="loginForm" style="text-align:left">
+        <div class="form-group">
+          <label for="password">Kata Sandi Admin</label>
+          <input type="password" id="password" class="form-control" autocomplete="current-password" placeholder="Masukkan password admin..." required>
+        </div>
+        <button type="submit" class="btn btn-green" style="width:100%;margin-top:10px">Masuk ke Dashboard</button>
+        <p id="loginStatus" class="form-status" style="text-align:center"></p>
+      </form>
+    </section>
+
+    <!-- Main Admin Dashboard Container -->
+    <div id="dashboardApp" hidden>
+
+      <!-- TAB 1: DASHBOARD OVERVIEW -->
+      <section id="tabDashboard" class="admin-tab-content">
+        <div class="stats" style="margin-bottom:24px">
+          <div class="stat"><span>Total Undangan</span><b id="dashTotalInv">0</b></div>
+          <div class="stat"><span>Total Respon RSVP</span><b id="dashTotalRsvp">0</b></div>
+          <div class="stat"><span>Tamu Hadir</span><b id="dashTotalAttend">0</b></div>
+        </div>
+
+        <div class="card-panel">
+          <div class="panel-title">
+            <div>
+              <p class="eyebrow">RINGKASAN CEPAT</p>
+              <h2>Daftar Undangan Terkini</h2>
+            </div>
+            <button class="btn btn-gold" id="btnGoToCreateWizard">+ Buat Undangan Baru</button>
+          </div>
+          <div id="dashInvitationList" style="margin-top:16px"></div>
+        </div>
+      </section>
+
+      <!-- TAB 2: SEMUA UNDANGAN (DENGAN FILTER KATEGORI & PENCARIAN) -->
+      <section id="tabInvitations" class="admin-tab-content" hidden>
+        <div class="card-panel">
+          <div class="panel-title">
+            <div>
+              <p class="eyebrow">MANAJEMEN UNDANGAN</p>
+              <h2>Semua Undangan Multi-Acara</h2>
+            </div>
+            <button class="btn btn-gold" onclick="document.querySelector('[data-tab=tabCreateWizard]').click()">+ Buat Undangan Baru</button>
+          </div>
+
+          <!-- Filter & Search Bar -->
+          <div style="display:flex;gap:10px;margin:18px 0;flex-wrap:wrap">
+            <input type="text" id="invSearchInput" class="form-control" placeholder="Cari berdasarkan nama/slug/judul acara..." style="flex:1;min-width:200px">
+            <select id="invCategoryFilter" class="form-control" style="width:auto;min-width:180px">
+              <option value="">Semua Kategori</option>
+            </select>
+            <select id="invStatusFilter" class="form-control" style="width:auto">
+              <option value="">Semua Status</option>
+              <option value="1">🟢 Terbit</option>
+              <option value="0">🟡 Draf</option>
+            </select>
+          </div>
+
+          <div id="fullInvitationList" style="margin-top:12px"></div>
+        </div>
+      </section>
+
+      <!-- TAB 3: BUAT UNDANGAN BARU (MULTI-EVENT WIZARD) -->
+      <section id="tabCreateWizard" class="admin-tab-content" hidden>
+        <div class="card-panel">
+          <div class="panel-title">
+            <div>
+              <p class="eyebrow">BUAT UNDANGAN BARU</p>
+              <h2>Langkah 1: Pilih Kategori Acara</h2>
+            </div>
+          </div>
+          <p style="color:#6b7280;font-size:13px">Pilih jenis acara yang ingin Anda buat undangannya. Setiap kategori memiliki formulir dan komponen yang disesuaikan secara otomatis.</p>
+
+          <div id="createCategoryCardsGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:20px 0"></div>
+
+          <!-- Form Wizard Konten Acara -->
+          <div id="createEventFormWrap" hidden style="margin-top:30px;border-top:1px solid #e5e7eb;padding-top:24px">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+              <span id="wizardCatIcon" style="font-size:32px"></span>
+              <div>
+                <h3 id="wizardCatName" style="margin:0;font-size:20px"></h3>
+                <small id="wizardCatDesc" style="color:#6b7280"></small>
+              </div>
+            </div>
+
+            <form id="wizardEventForm">
+              <input type="hidden" id="wizCatCode">
+              <div class="form-grid">
+                <div class="form-group wide">
+                  <label>Slug / Alamat URL Unik* (contoh: khitan-farhan, aqiqah-aisyah)</label>
+                  <input id="wizSlug" class="form-control" required pattern="[a-z0-9-]+" placeholder="contoh: khitan-farhan">
+                </div>
+
+                <!-- Wadah Dinamis untuk Field Sesuai Kategori -->
+                <div id="wizDynamicFields" class="form-grid wide" style="margin:0;display:contents"></div>
+
+                <div class="form-group wide">
+                  <label>Pilih Template Awal (Opsional)</label>
+                  <select id="wizTemplateSelect" class="form-control">
+                    <option value="">-- Gunakan Susunan Seksi Standar --</option>
+                  </select>
+                </div>
+
+                <div class="form-group wide">
+                  <label class="check"><input type="checkbox" id="wizPublished" checked> Terbitkan langsung (dapat diakses pengunjung)</label>
+                </div>
+              </div>
+
+              <div style="margin-top:20px;display:flex;gap:12px">
+                <button type="submit" class="btn btn-green">Simpan &amp; Lanjutkan ke Desain</button>
+                <button type="button" class="btn btn-outline" id="btnCancelWizard">Batal</button>
+              </div>
+              <p id="wizStatus" class="form-status"></p>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: KATEGORI ACARA (CUSTOM EVENT BUILDER) -->
+      <section id="tabCategories" class="admin-tab-content" hidden>
+        <div class="card-panel">
+          <div class="panel-title">
+            <div>
+              <p class="eyebrow">CUSTOM EVENT BUILDER</p>
+              <h2>Kelola Kategori Acara</h2>
+            </div>
+            <button class="btn btn-gold" id="btnOpenAddCategoryModal">+ Buat Kategori Baru</button>
+          </div>
+          <p style="color:#6b7280;font-size:13px">Admin dapat menambahkan kategori acara baru, menentukan kolom informasi khusus, dan mengatur komponen tanpa perlu mengedit kode program.</p>
+
+          <div id="eventCategoriesList" style="margin-top:20px;display:grid;gap:12px"></div>
+        </div>
+      </section>
+
+      <!-- TAB 5: THEME STUDIO -->
+      <section id="tabThemes" class="admin-tab-content" hidden>
+        <div class="studio-grid">
+          <div>
+            <div class="card-panel">
+              <div class="panel-title">
+                <div>
+                  <p class="eyebrow">THEME STUDIO</p>
+                  <h2>10 Preset Tema &amp; Tema Kustom</h2>
+                </div>
+                <button class="btn btn-gold" id="btnSaveCustomTheme">+ Simpan Tema Kustom</button>
+              </div>
+              <p style="color:#6b7280;font-size:13px">Semua tema dapat diterapkan bebas ke semua kategori undangan (Pernikahan, Khitanan, Ulang Tahun, Pengajian, dll).</p>
+
+              <div id="themePresetGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:20px 0"></div>
+
+              <hr style="border:0;border-top:1px solid #e5e7eb;margin:24px 0">
+
+              <h3>🎨 Kustomisasi Palet Warna Undangan</h3>
+              <div class="color-swatch-row">
+                <div class="color-item"><label>Warna Utama</label><input type="color" id="colPrimary" value="#073f35"></div>
+                <div class="color-item"><label>Warna Sekunder</label><input type="color" id="colSecondary" value="#0d5a49"></div>
+                <div class="color-item"><label>Aksen / Emas</label><input type="color" id="colGold" value="#d8b66a"></div>
+                <div class="color-item"><label>Latar Konten</label><input type="color" id="colBgContent" value="#f8f4e9"></div>
+                <div class="color-item"><label>Teks Utama</label><input type="color" id="colTextPrimary" value="#26352f"></div>
+                <div class="color-item"><label>Teks Muted</label><input type="color" id="colTextMuted" value="#748078"></div>
+                <div class="color-item"><label>Tombol Latar</label><input type="color" id="colBtnBg" value="#d8b66a"></div>
+                <div class="color-item"><label>Tombol Teks</label><input type="color" id="colBtnText" value="#193b30"></div>
+              </div>
+
+              <div class="form-grid" style="margin-top:20px">
+                <div class="form-group">
+                  <label for="selectHeadingFont">Jenis Font Judul</label>
+                  <select id="selectHeadingFont" class="form-control">
+                    <option value="Playfair Display">Playfair Display (Elegan Klasik)</option>
+                    <option value="Cinzel">Cinzel (Royal Megah)</option>
+                    <option value="Cormorant Garamond">Cormorant Garamond (Aristokrat)</option>
+                    <option value="Amiri">Amiri (Khat Islami)</option>
+                    <option value="Plus Jakarta Sans">Plus Jakarta Sans (Modern Bersih)</option>
+                    <option value="Montserrat">Montserrat (Minimalis Tegas)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="selectBodyFont">Jenis Font Isi</label>
+                  <select id="selectBodyFont" class="form-control">
+                    <option value="DM Sans">DM Sans (Luwes &amp; Nyaman Dibaca)</option>
+                    <option value="Plus Jakarta Sans">Plus Jakarta Sans (Modern)</option>
+                    <option value="Montserrat">Montserrat (Geometrik)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="selectBtnShape">Gaya Tombol</label>
+                  <select id="selectBtnShape" class="form-control">
+                    <option value="8px">Membulat (8px)</option>
+                    <option value="999px">Pil / Lonjong (Pill 999px)</option>
+                    <option value="4px">Elegan (4px)</option>
+                    <option value="0px">Tegas / Kotak (0px)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="selectPhotoFrame">Gaya Bingkai Foto</label>
+                  <select id="selectPhotoFrame" class="form-control">
+                    <option value="arch">Kubah Masjid / Arch</option>
+                    <option value="circle">Lingkaran (Circle)</option>
+                    <option value="rounded_rect">Kotak Membulat</option>
+                    <option value="double_gold">Bingkai Emas Ganda</option>
+                    <option value="hexagon">Heksagonal Modern</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style="margin-top:24px;display:flex;gap:10px">
+                <button id="btnApplyThemeToInv" class="btn btn-green">Simpan Perubahan Tema</button>
+                <button id="btnCloneTheme" class="btn btn-outline">Gandakan Tema Ini</button>
+              </div>
+              <p id="themeStatus" class="form-status"></p>
+            </div>
+          </div>
+
+          <!-- Live Device Preview Panel -->
+          <div class="preview-frame-wrap">
+            <div class="preview-controls">
+              <span>Preview Live:</span>
+              <button class="mini-btn" id="prevMobileBtn" style="background:#073f35;color:white">📱 HP</button>
+              <button class="mini-btn" id="prevTabletBtn">📱 Tablet</button>
+              <button class="mini-btn" id="prevReloadBtn">🔄 Muat Ulang</button>
+            </div>
+            <iframe id="themePreviewIframe" class="preview-iframe" src="/i/demo?preview=1"></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 6: ANIMATION STUDIO -->
+      <section id="tabAnimations" class="admin-tab-content" hidden>
+        <div class="card-panel" style="max-width:800px;margin:auto">
+          <div class="panel-title">
+            <div>
+              <p class="eyebrow">ANIMATION STUDIO</p>
+              <h2>Pengaturan Animasi Gerak</h2>
+            </div>
+            <label class="check" style="margin:0"><input type="checkbox" id="animMasterToggle" checked> <b>Aktifkan Animasi</b></label>
+          </div>
+
+          <div class="form-grid" style="margin-top:20px">
+            <div class="form-group">
+              <label for="animOpeningSelect">Animasi Pembuka (Cover Opening)</label>
+              <select id="animOpeningSelect" class="form-control">
+                <option value="envelope">Amplop dengan Segel Lilin (Wax Seal)</option>
+                <option value="curtain">Tirai Belah Dua (Curtain Opening)</option>
+                <option value="door_3d">Pintu Ganda 3D (Door Opening)</option>
+                <option value="zoom_in">Perbesaran Halus (Zoom In)</option>
+                <option value="fade_in">Pudar Menghilang (Fade In)</option>
+                <option value="golden_particles">Hujan Partikel Emas</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="animTextSelect">Animasi Teks</label>
+              <select id="animTextSelect" class="form-control">
+                <option value="fade_up">Naik Memudar (Fade Up)</option>
+                <option value="slide_left_right">Geser Bergantian (Slide Left/Right)</option>
+                <option value="soft_zoom">Perbesaran Lembut (Soft Zoom)</option>
+                <option value="elegant_reveal">Penyingkapan Elegan</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="animPhotoSelect">Animasi Foto</label>
+              <select id="animPhotoSelect" class="form-control">
+                <option value="ken_burns">Efek Ken Burns (Zoom Pelan Sinematik)</option>
+                <option value="floating">Melayang Lembut (Floating Frame)</option>
+                <option value="fade_in">Muncul Halus (Fade In)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="animOrnamentSelect">Animasi Ornamen</label>
+              <select id="animOrnamentSelect" class="form-control">
+                <option value="gold_dust">Partikel Emas Berpendar (Gold Dust)</option>
+                <option value="falling_petals">Kelopak Bunga Berguguran</option>
+                <option value="shimmer">Kilau Cahaya Berpendar (Shimmer)</option>
+                <option value="none">Tanpa Partikel (Bersih)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="animSpeedSlider">Kecepatan / Durasi: <b id="animSpeedVal">1.0s</b></label>
+              <input type="range" id="animSpeedSlider" min="0.4" max="2.5" step="0.1" value="1.0" class="form-control">
+            </div>
+
+            <div class="form-group">
+              <label for="animIntensitySelect">Intensitas Animasi</label>
+              <select id="animIntensitySelect" class="form-control">
+                <option value="subtle">Halus (Subtle)</option>
+                <option value="moderate">Sedang (Moderate)</option>
+                <option value="dramatic">Dramatis (Dramatic)</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="margin-top:24px;display:flex;gap:10px">
+            <button id="btnSaveAnimations" class="btn btn-green">Simpan Pengaturan Animasi</button>
+            <button id="btnTestAnimation" class="btn btn-gold">▶ Uji Preview Animasi</button>
+          </div>
+          <p id="animStatus" class="form-status"></p>
+        </div>
+      </section>
+
+      <!-- TAB 7: BACKGROUND & ORNAMEN STUDIO -->
+      <section id="tabBackgrounds" class="admin-tab-content" hidden>
+        <div class="card-panel" style="max-width:800px;margin:auto">
+          <div class="panel-title">
+            <div>
+              <p class="eyebrow">BACKGROUND &amp; ORNAMEN</p>
+              <h2>Pengaturan Latar &amp; Ornamen</h2>
+            </div>
+          </div>
+
+          <div class="form-grid" style="margin-top:20px">
+            <div class="form-group">
+              <label for="bgTypeSelect">Tipe Background</label>
+              <select id="bgTypeSelect" class="form-control">
+                <option value="gradient">Gradasi Elegan (Radial Gradient)</option>
+                <option value="solid">Warna Solid</option>
+                <option value="image">Gambar Latar Kustom (Image URL)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="bgPatternSelect">Pola Latar (Pattern Overlay)</label>
+              <select id="bgPatternSelect" class="form-control">
+                <option value="arabesque">Arabesque Geometris Islami</option>
+                <option value="botanical">Daun Botanikal Halus</option>
+                <option value="none">Tanpa Pola</option>
+              </select>
+            </div>
+
+            <div class="form-group wide">
+              <label for="bgImageUrlInput">URL Gambar Latar Belakang (Opsional)</label>
+              <input id="bgImageUrlInput" class="form-control" placeholder="https://images.unsplash.com/...">
+            </div>
+
+            <div class="form-group">
+              <label for="dividerStyleSelect">Gaya Pembatas Seksi (Divider)</label>
+              <select id="dividerStyleSelect" class="form-control">
+                <option value="diamond">Mahkota Diamond Emas</option>
+                <option value="floral">Sulur Bunga Klasik</option>
+                <option value="line">Garis Minimalis</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="check"><input type="checkbox" id="showFloralCorners" checked> Tampilkan Ornamen Sudut Bunga</label>
+              <label class="check"><input type="checkbox" id="showIslamicArch" checked> Tampilkan Aksen Kubah Islami</label>
+            </div>
+          </div>
+
+          <div style="margin-top:24px">
+            <button id="btnSaveBackgrounds" class="btn btn-green">Simpan Pengaturan Latar</button>
+          </div>
+          <p id="bgStatus" class="form-status"></p>
+        </div>
+      </section>
+
+      <!-- TAB 8: MUSIC & SOUND STUDIO -->
+      <section id="tabMusic" class="admin-tab-content" hidden>
+        <div class="card-panel" style="max-width:800px;margin:auto">
+          <div class="panel-title">
+            <div>
+              <p class="eyebrow">MUSIC &amp; SOUND STUDIO</p>
+              <h2>Musik Latar &amp; Kontrol Audio</h2>
+            </div>
+            <label class="check" style="margin:0"><input type="checkbox" id="musicEnableToggle" checked> <b>Aktifkan Musik</b></label>
+          </div>
+
+          <div class="form-grid" style="margin-top:20px">
+            <div class="form-group wide">
+              <label for="musicPresetSelect">Pilih Musik Bebas Royalti</label>
+              <select id="musicPresetSelect" class="form-control">
+                <option value="https://assets.mixkit.co/music/preview/mixkit-wedding-waltz-piano-242.mp3">Romantic Piano &amp; Strings (Wedding / Acara Romantis)</option>
+                <option value="https://assets.mixkit.co/music/preview/mixkit-serene-view-443.mp3">Acoustic Guitar Serenade (Ulang Tahun / Syukuran)</option>
+                <option value="https://assets.mixkit.co/music/preview/mixkit-oriental-vibes-2920.mp3">Islamic Oud &amp; Strings (Khitanan / Aqiqah / Pengajian)</option>
+                <option value="custom">-- Gunakan URL Musik Custom Sendiri --</option>
+              </select>
+            </div>
+
+            <div class="form-group wide">
+              <label for="musicUrlInput">URL File Audio Musik (MP3)</label>
+              <input id="musicUrlInput" class="form-control" placeholder="https://.../lagu-acara.mp3">
+            </div>
+
+            <div class="form-group">
+              <label for="musicVolumeSlider">Volume Bawaan: <b id="musicVolumeVal">75%</b></label>
+              <input type="range" id="musicVolumeSlider" min="0.1" max="1.0" step="0.05" value="0.75" class="form-control">
+            </div>
+
+            <div class="form-group">
+              <label for="musicIconSelect">Ikon Tombol Floating</label>
+              <select id="musicIconSelect" class="form-control">
+                <option value="vinyl">💿 Piringan Hitam</option>
+                <option value="note">♫ Not Balok</option>
+                <option value="clef">𝄞 Kunci G</option>
+                <option value="speaker">🔊 Speaker</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="musicPosSelect">Posisi Tombol</label>
+              <select id="musicPosSelect" class="form-control">
+                <option value="bottom-right">Kanan Bawah</option>
+                <option value="bottom-left">Kiri Bawah</option>
+                <option value="top-right">Kanan Atas</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="check"><input type="checkbox" id="musicAutoplayCheck" checked> Putar otomatis saat tombol "Buka Undangan" diklik</label>
+            </div>
+          </div>
+
+          <div style="margin-top:24px">
+            <button id="btnSaveMusic" class="btn btn-green">Simpan Pengaturan Musik</button>
+          </div>
+          <p id="musicStatus" class="form-status"></p>
+        </div>
+      </section>
+
+      <!-- TAB 9: SECTION BUILDER -->
+      <section id="tabSections" class="admin-tab-content" hidden>
+        <div class="card-panel">
+          <div class="panel-title">
+            <div>
+              <p class="eyebrow">SECTION BUILDER</p>
+              <h2>Penyusun Bagian Undangan Adaptif</h2>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-gold" id="btnOpenAddSectionModal">+ Tambah Bagian Baru</button>
+              <button class="btn btn-green" id="btnSaveSectionOrder">Simpan Urutan Seksi</button>
+            </div>
+          </div>
+          <p style="color:#6b7280;font-size:13px">Atur susunan seksi undangan aktif. Seksi dapat ditambah, dipindah urutan, disembunyikan, dan diedit bebas.</p>
+
+          <div id="sectionBuilderList" style="margin-top:20px;display:grid;gap:10px"></div>
+          <p id="sectionBuilderStatus" class="form-status"></p>
+        </div>
+      </section>
+
+      <!-- TAB 10: TEMPLATE MANAGER -->
+      <section id="tabTemplates" class="admin-tab-content" hidden>
+        <div class="card-panel">
+          <div class="panel-title">
+            <div>
+              <p class="eyebrow">TEMPLATE MANAGER</p>
+              <h2>Daftar Desain Siap Pakai Multi-Acara</h2>
+            </div>
+            <button class="btn btn-gold" id="btnSaveAsTemplate">+ Simpan Undangan Ini Jadi Template</button>
+          </div>
+          <p style="color:#6b7280;font-size:13px">Setiap template dapat diterapkan lintas kategori acara sesuai kebutuhan desain.</p>
+
+          <div style="margin:16px 0;display:flex;gap:8px;flex-wrap:wrap" id="templateCategoryFilters"></div>
+          <div id="templateCardGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:16px"></div>
+        </div>
+      </section>
+
+      <!-- TAB 11: GALERI ASET -->
+      <section id="tabAssets" class="admin-tab-content" hidden>
+        <div class="card-panel">
+          <div class="panel-title">
+            <div>
+              <p class="eyebrow">ASSET GALLERY</p>
+              <h2>Pustaka Ornamen &amp; Media</h2>
+            </div>
+            <button class="btn btn-gold" id="btnOpenUploadAssetModal">+ Unggah Aset Baru</button>
+          </div>
+          <div style="display:flex;gap:8px;margin:16px 0;flex-wrap:wrap" id="assetCategoryFilterBar">
+            <button class="mini-btn active" data-cat="">Semua</button>
+            <button class="mini-btn" data-cat="ornament_islamic">Ornamen Islami</button>
+            <button class="mini-btn" data-cat="ornament_floral">Ornamen Bunga</button>
+            <button class="mini-btn" data-cat="audio">Musik &amp; Audio</button>
+            <button class="mini-btn" data-cat="frame">Bingkai Foto</button>
+          </div>
+          <div id="assetGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px"></div>
+        </div>
+      </section>
+
+      <!-- TAB 12: DAFTAR TAMU -->
+      <section id="tabGuests" class="admin-tab-content" hidden>
+        <div class="card-panel">
+          <div class="panel-title">
+            <div>
+              <p class="eyebrow">BUKU TAMU PERSONAL</p>
+              <h2>Manajemen Tamu &amp; Link Personal</h2>
+            </div>
+          </div>
+          <form id="bulkGuestForm" style="margin:16px 0;background:#f9fafb;padding:16px;border-radius:8px">
+            <label style="font-weight:600;font-size:13px;display:block;margin-bottom:6px">Tambah Tamu Undangan (Satu nama per baris)</label>
+            <textarea id="bulkGuestNames" rows="3" class="form-control" placeholder="Bapak H. Ridwan Kamil&#10;Ibu Hj. Siti Nurhaliza&#10;Keluarga dr. Hendra"></textarea>
+            <button type="submit" class="btn btn-green" style="margin-top:10px">+ Tambahkan Tamu</button>
+          </form>
+          <div id="adminGuestList"></div>
+        </div>
+      </section>
+
+      <!-- TAB 13: RSVP REKAP -->
+      <section id="tabRsvp" class="admin-tab-content" hidden>
+        <div class="card-panel">
+          <div class="panel-title">
+            <div>
+              <p class="eyebrow">REKAP KEHADIRAN</p>
+              <h2>Konfirmasi Kehadiran RSVP</h2>
+            </div>
+            <button class="btn btn-gold" id="btnExportRsvpCsv">📥 Unduh Rekap CSV</button>
+          </div>
+          <div id="adminRsvpSummary" class="stats" style="margin:16px 0"></div>
+          <div id="adminRsvpList"></div>
+        </div>
+      </section>
+
+      <!-- TAB 14: STATISTIK -->
+      <section id="tabStats" class="admin-tab-content" hidden>
+        <div class="card-panel">
+          <div class="panel-title">
+            <div>
+              <p class="eyebrow">ANALITIK</p>
+              <h2>Statistik Pengunjung Undangan</h2>
+            </div>
+          </div>
+          <div id="statsDetailWrap" style="margin-top:16px"></div>
+        </div>
+      </section>
+
+      <!-- TAB 15: PENGATURAN -->
+      <section id="tabSettings" class="admin-tab-content" hidden>
+        <div class="card-panel" style="max-width:700px;margin:auto">
+          <div class="panel-title">
+            <div>
+              <p class="eyebrow">SISTEM &amp; PRIVASI</p>
+              <h2>Pengaturan Undangan Aktif</h2>
+            </div>
+          </div>
+
+          <div class="form-grid" style="margin-top:20px">
+            <div class="form-group wide">
+              <label for="invPrivacySelect">Tingkat Privasi</label>
+              <select id="invPrivacySelect" class="form-control">
+                <option value="public">Publik (Dapat diakses oleh siapa saja dengan tautan)</option>
+                <option value="token_only">Khusus Tamu Terdaftar (Harus memiliki link personal unik ?token=...)</option>
+                <option value="password">Dilindungi Kata Sandi (Pengunjung harus memasukkan password)</option>
+              </select>
+            </div>
+
+            <div class="form-group wide" id="pwSettingGroup">
+              <label for="invPrivacyPw">Kata Sandi Khusus Undangan Ini (Opsional)</label>
+              <input type="password" id="invPrivacyPw" class="form-control" placeholder="Kata sandi...">
+            </div>
+
+            <div class="form-group wide">
+              <label for="invPublishAtInput">Jadwal Publikasi Otomatis (Opsional)</label>
+              <input type="datetime-local" id="invPublishAtInput" class="form-control">
+            </div>
+          </div>
+
+          <div style="margin-top:20px">
+            <button id="btnSaveSettings" class="btn btn-green">Simpan Pengaturan Privasi</button>
+          </div>
+          <p id="settingStatus" class="form-status"></p>
+
+          <hr style="margin:24px 0;border:0;border-top:1px solid #e5e7eb">
+          <h3>ℹ️ Identitas Platform: UNDANGAN V2</h3>
+          <p style="font-size:13px;color:#4b5563">
+            <b>Slogan:</b> Satu Platform, Beragam Undangan.<br>
+            <b>Infrastruktur:</b> Cloudflare Pages Functions + Cloudflare D1 Database.<br>
+            <b>Ubah Password Admin:</b> Ganti variabel <code>ADMIN_PASSWORD</code> pada Cloudflare Pages Settings &gt; Environment Variables.
+          </p>
+        </div>
+      </section>
+
+      <!-- TAB 16: RIWAYAT PERUBAHAN -->
+      <section id="tabHistory" class="admin-tab-content" hidden>
+        <div class="card-panel" style="max-width:800px;margin:auto">
+          <div class="panel-title">
+            <div>
+              <p class="eyebrow">REVISI &amp; UNDO/RESTORE</p>
+              <h2>Riwayat Snapshot Desain</h2>
+            </div>
+            <button class="btn btn-gold" id="btnCreateSnapshot">+ Buat Snapshot Baru</button>
+          </div>
+          <p style="color:#6b7280;font-size:13px">Simpan salinan cadangan desain undangan aktif dan pulihkan kapan saja dengan 1-klik.</p>
+
+          <div id="versionsList" style="margin-top:20px;display:grid;gap:12px"></div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- MODAL: ADD / EDIT CATEGORY (CUSTOM EVENT BUILDER) -->
+  <div id="modalCategory" class="lightbox-modal" hidden>
+    <div class="card-panel" style="max-width:600px;width:95%;max-height:85vh;overflow-y:auto;text-align:left">
+      <div class="panel-title">
+        <h2 id="modalCatTitle">Tambah Kategori Acara</h2>
+        <button class="btn btn-outline" id="btnCloseCatModal">✕</button>
+      </div>
+      <form id="formCategoryBuilder" style="margin-top:16px">
+        <input type="hidden" id="editCatId">
+        <div class="form-group">
+          <label>Nama Kategori Acara*</label>
+          <input id="catNameInput" class="form-control" required placeholder="contoh: Pameran Seni, Konser Musik, dll">
+        </div>
+        <div class="form-group">
+          <label>Kode Unik (huruf kecil &amp; strip)*</label>
+          <input id="catCodeInput" class="form-control" required placeholder="contoh: pameran_seni">
+        </div>
+        <div class="form-group">
+          <label>Ikon Emoji / Simbol*</label>
+          <input id="catIconInput" class="form-control" required value="🎨" style="width:100px;font-size:20px">
+        </div>
+        <div class="form-group">
+          <label>Deskripsi Kategori</label>
+          <textarea id="catDescInput" rows="2" class="form-control" placeholder="Jelaskan jenis acara ini..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Daftar Kolom Informasi Khusus (Fields JSON):</label>
+          <textarea id="catFieldsJsonInput" rows="4" class="form-control" style="font-family:monospace;font-size:12px"></textarea>
+          <small style="color:#6b7280">Format: [{"key":"custom_field", "label":"Nama Kolom", "type":"text", "required":true}]</small>
+        </div>
+        <button type="submit" class="btn btn-green" style="width:100%;margin-top:16px">Simpan Kategori Acara</button>
+        <p id="catModalStatus" class="form-status"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: EDIT UNDANGAN UTAMA -->
+  <div id="modalEditInv" class="lightbox-modal" hidden>
+    <div class="card-panel" style="max-width:650px;width:95%;max-height:90vh;overflow-y:auto;text-align:left">
+      <div class="panel-title">
+        <h2 id="modalInvTitle">Edit Data Undangan</h2>
+        <button class="btn btn-outline" id="btnCloseModalInv">✕ Tutup</button>
+      </div>
+      <form id="formInvData" style="margin-top:16px">
+        <input type="hidden" id="editInvId">
+        <div class="form-grid">
+          <div class="form-group wide">
+            <label>Kategori Acara</label>
+            <select id="editCategoryCode" class="form-control"></select>
+          </div>
+          <div class="form-group wide">
+            <label>Slug Alamat URL*</label>
+            <input id="editSlug" class="form-control" required pattern="[a-z0-9-]+">
+          </div>
+          <div class="form-group wide">
+            <label>Judul / Nama Acara (untuk Non-Pernikahan)</label>
+            <input id="editEventTitle" class="form-control" placeholder="contoh: Tasyakuran Khitanan Farhan">
+          </div>
+          <div class="form-group"><label>Nama Mempelai Pria / Nama Utama<input id="editGroomName" class="form-control"></label></div>
+          <div class="form-group"><label>Nama Mempelai Wanita (Pernikahan)<input id="editBrideName" class="form-control"></label></div>
+          <div class="form-group"><label>Orang Tua / Penyelenggara 1<input id="editGroomParents" class="form-control"></label></div>
+          <div class="form-group"><label>Orang Tua 2<input id="editBrideParents" class="form-control"></label></div>
+          <div class="form-group"><label>Tanggal Acara<input type="date" id="editEventDate" class="form-control"></label></div>
+          <div class="form-group"><label>Waktu Acara<input id="editEventTime" class="form-control" placeholder="09.00 WIB - selesai"></label></div>
+          <div class="form-group"><label>Nama Tempat<input id="editVenue" class="form-control"></label></div>
+          <div class="form-group wide"><label>Alamat Lengkap<textarea id="editAddress" rows="2" class="form-control"></textarea></label></div>
+          <div class="form-group wide"><label>Link Google Maps<input id="editMapsUrl" type="url" class="form-control"></label></div>
+          <div class="form-group wide"><label>Kutipan / Ayat Pembuka<textarea id="editQuoteText" rows="2" class="form-control"></textarea></label></div>
+          <div class="form-group wide"><label>Deskripsi / Cerita<textarea id="editStoryText" rows="2" class="form-control"></textarea></label></div>
+          <div class="form-group wide"><label>Foto Sampul (URL)<input id="editCoverImage" type="url" class="form-control"></label></div>
+          <div class="form-group wide"><label>Galeri Foto (Satu URL per baris)<textarea id="editGalleryUrls" rows="3" class="form-control"></textarea></label></div>
+          <div class="form-group wide"><label class="check"><input type="checkbox" id="editIsPublished" checked> Terbitkan Undangan (Dapat Diakses Publik)</label></div>
+        </div>
+        <button type="submit" class="btn btn-green" style="width:100%;margin-top:16px">Simpan Data Undangan</button>
+        <p id="editInvStatus" class="form-status"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD SECTION -->
+  <div id="modalAddSection" class="lightbox-modal" hidden>
+    <div class="card-panel" style="max-width:560px;width:95%;text-align:left">
+      <div class="panel-title">
+        <h2>Tambah Bagian Baru</h2>
+        <button class="btn btn-outline" id="btnCloseAddSection">✕</button>
+      </div>
+      <p style="color:#6b7280;font-size:13px">Pilih komponen yang ingin ditambahkan ke undangan:</p>
+      <div id="componentChoicesGrid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:16px 0;max-height:50vh;overflow-y:auto"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: EDIT SECTION CONTENT -->
+  <div id="modalEditSection" class="lightbox-modal" hidden>
+    <div class="card-panel" style="max-width:600px;width:95%;max-height:85vh;overflow-y:auto;text-align:left">
+      <div class="panel-title">
+        <h2 id="editSectionModalTitle">Edit Bagian Seksi</h2>
+        <button class="btn btn-outline" id="btnCloseEditSection">✕</button>
+      </div>
+      <form id="formEditSectionDetails" style="margin-top:16px">
+        <input type="hidden" id="editSectionId">
+        <div class="form-group">
+          <label>Judul Seksi</label>
+          <input id="secEditTitle" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Subjudul Seksi</label>
+          <input id="secEditSubtitle" class="form-control">
+        </div>
+        <div id="secDynamicFieldsContainer"></div>
+        <button type="submit" class="btn btn-green" style="width:100%;margin-top:16px">Simpan Konten Seksi</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/admin.js"></script>
+</body>
+</html>

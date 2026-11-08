@@ -1,0 +1,11 @@
+{
+  "name": "undangan",
+  "version": "2.0.0",
+  "description": "UNDANGAN V2 - Platform Undangan Digital Multi-Acara. Satu Platform, Beragam Undangan.",
+  "type": "module",
+  "scripts": {
+    "start": "node dev-server.js",
+    "test": "node tests/run_all_tests.js"
+  },
+  "private": true
+}
