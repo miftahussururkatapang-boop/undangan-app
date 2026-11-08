@@ -1,3 +1,5 @@
+import nodeCrypto from "node:crypto";
+if (!globalThis.crypto) { globalThis.crypto = nodeCrypto.webcrypto; }
 /**
  * UNDANGAN V2 - Local Development & Test Server
  * Simulates Cloudflare Pages Functions & Cloudflare D1 Database locally

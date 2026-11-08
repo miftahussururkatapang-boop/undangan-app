@@ -1,12 +1,6 @@
 import { json, body, requireAdmin, sanitize } from '../../../_utils.js';
 
-let webCrypto = globalThis.crypto;
-if (!webCrypto || !webCrypto.randomUUID) {
-  try {
-    const nodeCrypto = await import('node:crypto');
-    webCrypto = nodeCrypto.webcrypto || nodeCrypto.default?.webcrypto || nodeCrypto.default;
-  } catch {}
-}
+const webCrypto = globalThis.crypto;
 
 export async function onRequestGet({ params, request, env }) {
   if (!await requireAdmin(request, env)) return json({ error: 'Belum login.' }, 401);
@@ -30,7 +24,6 @@ export async function onRequestPost({ params, request, env }) {
   const inv = await env.DB.prepare('SELECT id FROM invitations WHERE id=?').bind(params.id).first();
   if (!inv) return json({ error: 'Undangan tidak ditemukan.' }, 404);
 
-  // Dukung input single maupun bulk (array atau multiline teks)
   let names = [];
   if (Array.isArray(b?.guest_names)) {
     names = b.guest_names.map(n => sanitize(n, 100)).filter(Boolean);

@@ -1,8 +1,9 @@
 name = "undangan"
 compatibility_date = "2026-11-08"
+compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = "./public"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "undangan-db"
-database_id = "0ea199fa-f758-4234-a8bf-596d7814b22c"
+database_id = "GANTI_DENGAN_DATABASE_ID_ANDA"

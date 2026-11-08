@@ -1,4 +1,4 @@
-import { json, requireAdmin, safeJson } from '../../../../_utils.js';
+import { json, requireAdmin, safeJson } from '../../../../../_utils.js';
 
 export async function onRequestPost({ params, request, env }) {
   if (!await requireAdmin(request, env)) return json({ error: 'Belum login.' }, 401);

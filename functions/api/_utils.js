@@ -1,10 +1,4 @@
-let webCrypto = globalThis.crypto;
-if (!webCrypto || !webCrypto.subtle || !webCrypto.randomUUID) {
-  try {
-    const nodeCrypto = await import('node:crypto');
-    webCrypto = nodeCrypto.webcrypto || nodeCrypto.default?.webcrypto || nodeCrypto.default;
-  } catch {}
-}
+const webCrypto = globalThis.crypto;
 
 export const json = (data, status = 200, headers = {}) => new Response(JSON.stringify(data), {
   status,
